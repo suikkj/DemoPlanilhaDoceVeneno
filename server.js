@@ -25,7 +25,7 @@ app.use(express.json());
 // Configuração do CORS
 // Permite requisições do seu frontend no Vercel
 const allowedOrigins = [
-  'https://docevenenoestoque.vercel.app' // Sua URL do frontend no Vercel
+  'https://demo-planilha-doce-veneno.vercel.app' // Sua URL do frontend no Vercel
 ];
 
 // Em ambiente de desenvolvimento, você pode querer adicionar o localhost
@@ -63,107 +63,6 @@ if (!jwtSecret && process.env.NODE_ENV === 'production') {
 
 // --- Middleware de Autenticação ---
 
-
-// --- Rotas de Autenticação ---
-
-// Registro de Usuário
-// Para "pessoas selecionadas por mim", você pode:
-// 1. Chamar esta rota manualmente (via Postman/curl) para criar os usuários.
-// 2. Criar uma página de registro separada e protegida que só você acessa.
-// 3. Implementar um sistema de convites/aprovação (mais complexo).
-// Por simplicidade, esta rota está aberta, mas em produção você a protegeria ou não a exporia diretamente.
-app.post('/api/auth/register', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
-        }
-
-        const { data: existingUser, error: fetchError } = await supabase
-            .from('usuarios')
-            .select('id')
-            .eq('email', email)
-            .single();
-
-        if (fetchError && fetchError.code !== 'PGRST116') {
-            throw fetchError; // Erro diferente de "não encontrado"
-        }
-
-        if (existingUser) {
-            return res.status(400).json({ message: 'Usuário já existe com este email.' });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const { error: insertError } = await supabase
-            .from('usuarios')
-            .insert([{ email, password_hash: hashedPassword, status: 'pending', created_at: new Date() }]); // CORRIGIDO
-
-        if (insertError) {
-            throw insertError;
-        }
-
-        res.status(201).json({ message: 'Usuário registrado com sucesso! Aguardando aprovação.' });
-    } catch (err) {
-        console.error('Erro ao registrar usuário:', err); // Adicionado log do erro no servidor
-        res.status(500).json({ message: 'Erro ao registrar usuário', error: err.message });
-    }
-});
-
-// Login de Usuário
-app.post('/api/auth/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
-        }
-
-        const { data: user, error: fetchError } = await supabase
-            .from('usuarios')
-            .select('*')
-            .eq('email', email)
-            .single();
-
-        if (fetchError) {
-            // If the specific error is "user not found" (PGRST116), that's a normal 400.
-            if (fetchError.code === 'PGRST116') {
-                return res.status(400).json({ message: 'Credenciais inválidas.' });
-            }
-            // For any other database error, it's a server-side problem.
-            console.error('Supabase login error:', fetchError);
-            return res.status(500).json({ message: 'Erro no servidor ao tentar autenticar.' });
-        }
-
-        // Fallback check, though Supabase's .single() should prevent this case.
-        if (!user) {
-            return res.status(400).json({ message: 'Credenciais inválidas.' });
-        }
-
-        if (user.status !== 'active') {
-             return res.status(403).json({ message: 'Sua conta ainda não foi ativada pelo administrador.' });
-        }
-
-        // Check if password hash exists to prevent bcrypt error on corrupt user data
-        if (!user.password_hash) {
-            console.error(`Login attempt for user ${email} failed: no password hash found in database.`);
-            return res.status(500).json({ message: 'Erro no servidor: conta de usuário inválida.' });
-        }
-
-        const isMatch = await bcrypt.compare(password, user.password_hash);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Credenciais inválidas.' });
-        }
-
-        // Usuário autenticado, gerar JWT
-        const accessToken = jwt.sign({ userId: user.id, email: user.email }, jwtSecret, { expiresIn: '7d' }); // Token expira em 7 dias
-
-        res.json({ accessToken });
-    } catch (err) {
-        console.error('Erro inesperado ao fazer login:', err);
-        res.status(500).json({ message: 'Erro ao fazer login', error: err.message });
-    }
-});
 
 // --- Rotas da API (Endpoints) ---
 
@@ -350,5 +249,5 @@ app.post('/api/historico', async (req, res) => {
 
 app.listen(port, () => {
     // Não precisa mais conectar ao DB aqui
-    console.log(`Servidor rodando em http://localhost:${port} e conectado ao Supabase.`);
+    console.log(`Servidor rodando em http://localhost:${port} e conectado ao Supabase :D`);
 });
