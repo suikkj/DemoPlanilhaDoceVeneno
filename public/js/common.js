@@ -21,10 +21,6 @@ function logoutUser() {
  * @param {Response} response The fetch response object.
  */
 async function handleApiError(response) {
-    if (response.status === 401 || response.status === 403) {
-        logoutUser();
-        throw new Error('Acesso não autorizado ou sessão expirada. Você será redirecionado para o login.');
-    }
 
     let errorData;
     try {
@@ -48,7 +44,6 @@ async function carregarPecas() {
 
     try {
         const response = await fetch(`${API_BASE_URL}/pecas`, {
-            headers: { 'Authorization': `Bearer ${getAuthToken()}` },
             signal: controller.signal // Anexa o sinal do AbortController à requisição
         });
         clearTimeout(timeoutId); // Limpa o timeout se a requisição for concluída
@@ -78,8 +73,7 @@ async function addPecaAPI(novaPeca) {
         const response = await fetch(`${API_BASE_URL}/pecas`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getAuthToken()}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(novaPeca),
         });
@@ -106,7 +100,6 @@ async function updatePecaAPI(pecaId, dadosAtualizados) {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getAuthToken()}`
             },
             body: JSON.stringify(dadosAtualizados),
         });
@@ -127,7 +120,7 @@ async function updatePecaAPI(pecaId, dadosAtualizados) {
  */
 async function carregarHistoricoMensalAPI() {
     try {
-        const response = await fetch(`${API_BASE_URL}/historico`, { headers: { 'Authorization': `Bearer ${getAuthToken()}` } });
+        const response = await fetch(`${API_BASE_URL}/historico`);
         if (!response.ok) {
             await handleApiError(response);
         }
@@ -148,9 +141,6 @@ async function deletePecaAPI(pecaId) {
     try {
         const response = await fetch(`${API_BASE_URL}/pecas/${pecaId}`, {
             method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${getAuthToken()}`
-            }
         });
         if (!response.ok) {
             await handleApiError(response);
@@ -180,7 +170,6 @@ async function batchUpdatePecasAPI(ids, updates, action = null) {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getAuthToken()}`
             },
             body: JSON.stringify(payload),
         });
@@ -206,7 +195,6 @@ async function salvarHistoricoMensalAPI(historico) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${getAuthToken()}`
             },
             body: JSON.stringify(historico),
         });
@@ -575,12 +563,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     if (themeToggleBtn) {
         themeToggleBtn.addEventListener('click', toggleTheme);
-    }
-
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn && isUserLoggedIn()) {
-        logoutBtn.style.display = 'inline-block'; // Mostra o botão
-        logoutBtn.addEventListener('click', logoutUser);
     }
 
     window.addEventListener('click', (event) => {
