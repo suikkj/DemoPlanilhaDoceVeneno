@@ -8,11 +8,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let todasAsPecas = [];
  
-    // Verifica se o usuário está logado. Se não, redireciona e para a execução do script.
-    if (!isUserLoggedIn()) {
-        window.location.href = 'login.html';
-        return;
-    }
 
     //Excel
     if (downloadBtn) {

@@ -24,10 +24,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let todasAsPecas = [];
     let currentSellModalHandler = null;
  
-    if (!isUserLoggedIn()) {
-        window.location.href = 'login.html';
-        return;
-    }
 
     // --- INÍCIO: Lógica de Tags do Formulário ---
 
