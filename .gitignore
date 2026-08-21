@@ -1,0 +1,35 @@
+# Dependências
+node_modules/
+
+# Ambiente e segredos
+.env
+.env.*
+*.pem
+
+# Logs
+*.log
+
+# Artefatos de build/compilação
+dist/
+build/
+.gradle/
+__pycache__/
+*.pyc
+
+# Firebase / Service account
+google-services.json
+*firebase-adminsdk*
+*.serviceaccount*
+
+# Banco de dados / BI
+*.pbit
+*.pbix
+
+# Crash dumps
+crash-*
+
+# Sistema / editores
+.DS_Store
+.vercel/
+.idea/
+*.suo
